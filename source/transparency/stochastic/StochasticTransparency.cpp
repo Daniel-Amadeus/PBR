@@ -238,7 +238,7 @@ void StochasticTransparency::updateFramebuffer()
     m_opaqueColorAttachment->image2DMultisample(numSamples, GL_RGBA8, size, GL_FALSE);
     m_transparentColorAttachment->image2DMultisample(numSamples, GL_RGBA32F, size, GL_FALSE);
     m_totalAlphaAttachment->image2DMultisample(numSamples, GL_R32F, size, GL_FALSE);
-    m_depthAttachment->image2DMultisample(numSamples, GL_DEPTH_COMPONENT16, size, GL_FALSE);
+    m_depthAttachment->image2DMultisample(numSamples, GL_DEPTH_COMPONENT, size, GL_FALSE);
 }
 
 void StochasticTransparency::updateNumSamples()
@@ -257,9 +257,9 @@ void StochasticTransparency::clearBuffers()
 {
     m_fbo->setDrawBuffers({ kOpaqueColorAttachment, kTransparentColorAttachment, kTotalAlphaAttachment });
     
-    m_fbo->clearBuffer(GL_COLOR, 0, glm::vec4{0.85f, 0.87f, 0.91f, 1.0f});
-    m_fbo->clearBuffer(GL_COLOR, 1, glm::vec4{0.0f});
-    m_fbo->clearBuffer(GL_COLOR, 2, glm::vec4{1.0f});
+    m_fbo->clearBuffer(GL_COLOR, 0, glm::vec4(0.85f, 0.87f, 0.91f, 1.0f));
+    m_fbo->clearBuffer(GL_COLOR, 1, glm::vec4(0.0f));
+    m_fbo->clearBuffer(GL_COLOR, 2, glm::vec4(1.0f));
     m_fbo->clearBufferfi(GL_DEPTH_STENCIL, 0, 1.0f, 0.0f);
 }
 
