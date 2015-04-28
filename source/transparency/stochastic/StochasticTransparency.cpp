@@ -25,13 +25,12 @@
 #include <gloperate/painter/ViewportCapability.h>
 #include <gloperate/painter/PerspectiveProjectionCapability.h>
 #include <gloperate/painter/CameraCapability.h>
-#include <gloperate/painter/TypedRenderTargetCapability.h>
-#include <gloperate/painter/VirtualTimeCapability.h>
 
 #include <gloperate/primitives/AdaptiveGrid.h>
 #include <gloperate/primitives/ScreenAlignedQuad.h>
 
 #include <reflectionzeug/PropertyGroup.h>
+#include <widgetzeug/make_unique.hpp>
 
 #include "MasksTableGenerator.h"
 #include "StochasticTransparencyOptions.h"
@@ -46,28 +45,16 @@ using namespace gl;
 using namespace glm;
 using namespace globjects;
 
-using reflectionzeug::make_unique;
+using widgetzeug::make_unique;
 
 StochasticTransparency::StochasticTransparency(gloperate::ResourceManager & resourceManager)
-:   Painter{resourceManager}
-,   m_targetFramebufferCapability{new gloperate::TargetFramebufferCapability}
-,   m_viewportCapability{new gloperate::ViewportCapability}
-,   m_projectionCapability{new gloperate::PerspectiveProjectionCapability{m_viewportCapability}}
-,   m_typedRenderTargetCapability{new gloperate::TypedRenderTargetCapability{}}
-,   m_cameraCapability{new gloperate::CameraCapability{}}
-,   m_timeCapability{new gloperate::VirtualTimeCapability}
-,   m_options{make_unique<StochasticTransparencyOptions>(*this)}
+:   Painter(resourceManager)
+,   m_targetFramebufferCapability(addCapability(make_unique<gloperate::TargetFramebufferCapability>()))
+,   m_viewportCapability(addCapability(make_unique<gloperate::ViewportCapability>()))
+,   m_projectionCapability(addCapability(make_unique<gloperate::PerspectiveProjectionCapability>(m_viewportCapability)))
+,   m_cameraCapability(addCapability(make_unique<gloperate::CameraCapability>()))
+,   m_options(make_unique<StochasticTransparencyOptions>(*this))
 {
-    m_timeCapability->setLoopDuration(20.0f * pi<float>());
-
-    m_targetFramebufferCapability->changed.connect(this, &StochasticTransparency::onTargetFramebufferChanged);
-
-    addCapability(m_targetFramebufferCapability);
-    addCapability(m_viewportCapability);
-    addCapability(m_projectionCapability);
-    addCapability(m_cameraCapability);
-    addCapability(m_timeCapability);
-    addCapability(m_typedRenderTargetCapability);
 }
 
 StochasticTransparency::~StochasticTransparency() = default;
@@ -76,8 +63,6 @@ void StochasticTransparency::onInitialize()
 {
     globjects::init();
     globjects::DebugMessage::enable();
-    
-    onTargetFramebufferChanged();
 
 #ifdef __APPLE__
     Shader::clearGlobalReplacements();
@@ -147,17 +132,6 @@ void StochasticTransparency::onPaint()
     }
     
     Framebuffer::unbind(GL_FRAMEBUFFER);
-}
-
-void StochasticTransparency::onTargetFramebufferChanged()
-{
-    auto fbo = m_targetFramebufferCapability->framebuffer();
-
-    if (!fbo)
-        fbo = globjects::Framebuffer::defaultFBO();
-
-    m_typedRenderTargetCapability->setRenderTarget(gloperate::RenderTargetType::Depth, fbo,
-        GLenum::GL_DEPTH_ATTACHMENT, GLenum::GL_DEPTH_COMPONENT);
 }
 
 void StochasticTransparency::setupFramebuffer()

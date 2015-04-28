@@ -11,46 +11,36 @@
 #include <globjects/DebugMessage.h>
 #include <globjects/Program.h>
 
+#include <widgetzeug/make_unique.hpp>
+
 #include <gloperate/base/RenderTargetType.h>
 
 #include <gloperate/painter/TargetFramebufferCapability.h>
 #include <gloperate/painter/ViewportCapability.h>
 #include <gloperate/painter/PerspectiveProjectionCapability.h>
 #include <gloperate/painter/CameraCapability.h>
-#include <gloperate/painter/TypedRenderTargetCapability.h>
 #include <gloperate/painter/VirtualTimeCapability.h>
 
 #include <gloperate/primitives/AdaptiveGrid.h>
 #include <gloperate/primitives/Icosahedron.h>
 
+
 using namespace gl;
 using namespace glm;
 using namespace globjects;
 
+using widgetzeug::make_unique;
+
 EmptyExample::EmptyExample(gloperate::ResourceManager & resourceManager)
 :   Painter(resourceManager)
-,   m_targetFramebufferCapability{new gloperate::TargetFramebufferCapability}
-,   m_viewportCapability{new gloperate::ViewportCapability}
-,   m_projectionCapability{new gloperate::PerspectiveProjectionCapability{m_viewportCapability}}
-,   m_typedRenderTargetCapability{new gloperate::TypedRenderTargetCapability{}}
-,   m_cameraCapability{new gloperate::CameraCapability{}}
-,   m_timeCapability{new gloperate::VirtualTimeCapability}
-{
-    m_timeCapability->setLoopDuration(20.0f * pi<float>());
-
-    m_targetFramebufferCapability->changed.connect([this](){ this->onTargetFramebufferChanged();});
-
-    addCapability(m_targetFramebufferCapability);
-    addCapability(m_viewportCapability);
-    addCapability(m_projectionCapability);
-    addCapability(m_cameraCapability);
-    addCapability(m_timeCapability);
-    addCapability(m_typedRenderTargetCapability);
-}
-
-EmptyExample::~EmptyExample()
+,   m_targetFramebufferCapability{addCapability(make_unique<gloperate::TargetFramebufferCapability>())}
+,   m_viewportCapability{addCapability(make_unique<gloperate::ViewportCapability>())}
+,   m_projectionCapability{addCapability(make_unique<gloperate::PerspectiveProjectionCapability>(m_viewportCapability))}
+,   m_cameraCapability{addCapability(make_unique<gloperate::CameraCapability>())}
 {
 }
+
+EmptyExample::~EmptyExample() = default;
 
 void EmptyExample::setupProjection()
 {
@@ -68,7 +58,6 @@ void EmptyExample::onInitialize()
     // create program
 
     globjects::init();
-    onTargetFramebufferChanged();
 
 #ifdef __APPLE__
     Shader::clearGlobalReplacements();
@@ -133,15 +122,4 @@ void EmptyExample::onPaint()
     m_program->release();
 
     Framebuffer::unbind(GL_FRAMEBUFFER);
-}
-
-void EmptyExample::onTargetFramebufferChanged()
-{
-    auto fbo = m_targetFramebufferCapability->framebuffer();
-
-    if (!fbo)
-        fbo = globjects::Framebuffer::defaultFBO();
-
-    m_typedRenderTargetCapability->setRenderTarget(gloperate::RenderTargetType::Depth, fbo,
-        GLenum::GL_DEPTH_ATTACHMENT, GLenum::GL_DEPTH_COMPONENT);
 }

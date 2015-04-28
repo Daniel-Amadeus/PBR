@@ -25,47 +25,34 @@
 #include <gloperate/painter/ViewportCapability.h>
 #include <gloperate/painter/PerspectiveProjectionCapability.h>
 #include <gloperate/painter/CameraCapability.h>
-#include <gloperate/painter/TypedRenderTargetCapability.h>
-#include <gloperate/painter/VirtualTimeCapability.h>
 
 #include <gloperate/primitives/AdaptiveGrid.h>
 
 #include <reflectionzeug/PropertyGroup.h>
+#include <widgetzeug/make_unique.hpp>
 
 #include "../AssimpLoader.h"
 #include "../AssimpProcessing.h"
 #include "../PolygonalDrawable.h"
 #include "../PolygonalGeometry.h"
-#include "../util.hpp"
 
 
 using namespace gl;
 using namespace glm;
 using namespace globjects;
 
+using widgetzeug::make_unique;
+
 ScreenDoor::ScreenDoor(gloperate::ResourceManager & resourceManager)
-:   Painter{resourceManager}
-,   m_targetFramebufferCapability{new gloperate::TargetFramebufferCapability}
-,   m_viewportCapability{new gloperate::ViewportCapability}
-,   m_projectionCapability{new gloperate::PerspectiveProjectionCapability{m_viewportCapability}}
-,   m_typedRenderTargetCapability{new gloperate::TypedRenderTargetCapability{}}
-,   m_cameraCapability{new gloperate::CameraCapability{}}
-,   m_timeCapability{new gloperate::VirtualTimeCapability}
+:   Painter(resourceManager)
+,   m_targetFramebufferCapability{addCapability(make_unique<gloperate::TargetFramebufferCapability>())}
+,   m_viewportCapability{addCapability(make_unique<gloperate::ViewportCapability>())}
+,   m_projectionCapability{addCapability(make_unique<gloperate::PerspectiveProjectionCapability>(m_viewportCapability))}
+,   m_cameraCapability{addCapability(make_unique<gloperate::CameraCapability>())}
 ,   m_multisampling{false}
 ,   m_multisamplingChanged{false}
 ,   m_transparency{0.5}
-{
-    m_timeCapability->setLoopDuration(20.0f * pi<float>());
-
-    m_targetFramebufferCapability->changed.connect(this, &ScreenDoor::onTargetFramebufferChanged);
-
-    addCapability(m_targetFramebufferCapability);
-    addCapability(m_viewportCapability);
-    addCapability(m_projectionCapability);
-    addCapability(m_cameraCapability);
-    addCapability(m_timeCapability);
-    addCapability(m_typedRenderTargetCapability);
-    
+{    
     setupPropertyGroup();
 }
 
@@ -109,7 +96,6 @@ void ScreenDoor::onInitialize()
 {
     globjects::init();
     globjects::DebugMessage::enable();
-    onTargetFramebufferChanged();
 
 #ifdef __APPLE__
     Shader::clearGlobalReplacements();
@@ -197,17 +183,6 @@ void ScreenDoor::onPaint()
     
     m_fbo->blit(GL_COLOR_ATTACHMENT0, rect, targetfbo, drawBuffer, rect,
         GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-}
-
-void ScreenDoor::onTargetFramebufferChanged()
-{
-    auto fbo = m_targetFramebufferCapability->framebuffer();
-
-    if (!fbo)
-        fbo = globjects::Framebuffer::defaultFBO();
-
-    m_typedRenderTargetCapability->setRenderTarget(gloperate::RenderTargetType::Depth, fbo,
-        GLenum::GL_DEPTH_ATTACHMENT, GLenum::GL_DEPTH_COMPONENT);
 }
 
 void ScreenDoor::setupFramebuffer()

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <vector>
 
 #include <glbinding/gl/types.h>
@@ -24,8 +26,6 @@ namespace gloperate
     class AbstractViewportCapability;
     class AbstractPerspectiveProjectionCapability;
     class AbstractCameraCapability;
-    class TypedRenderTargetCapability;
-    class AbstractVirtualTimeCapability;
 }
 
 class PolygonalDrawable;
@@ -49,8 +49,6 @@ protected:
     virtual void onInitialize() override;
     virtual void onPaint() override;
 
-    void onTargetFramebufferChanged();
-
 protected:
     void setupFramebuffer();
     void setupProjection();
@@ -63,9 +61,7 @@ protected:
     gloperate::AbstractTargetFramebufferCapability * m_targetFramebufferCapability;
     gloperate::AbstractViewportCapability * m_viewportCapability;
     gloperate::AbstractPerspectiveProjectionCapability * m_projectionCapability;
-    gloperate::TypedRenderTargetCapability * m_typedRenderTargetCapability;
     gloperate::AbstractCameraCapability * m_cameraCapability;
-    gloperate::AbstractVirtualTimeCapability * m_timeCapability;
 
     /* members */
     globjects::ref_ptr<globjects::Framebuffer> m_fbo;
