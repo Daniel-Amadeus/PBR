@@ -20,6 +20,7 @@
 #include <globjects/Texture.h>
 
 #include <gloperate/base/RenderTargetType.h>
+#include <gloperate/base/make_unique.hpp>
 
 #include <gloperate/painter/TargetFramebufferCapability.h>
 #include <gloperate/painter/ViewportCapability.h>
@@ -45,13 +46,13 @@ using widgetzeug::make_unique;
 
 ScreenDoor::ScreenDoor(gloperate::ResourceManager & resourceManager)
 :   Painter(resourceManager)
-,   m_targetFramebufferCapability{addCapability(make_unique<gloperate::TargetFramebufferCapability>())}
-,   m_viewportCapability{addCapability(make_unique<gloperate::ViewportCapability>())}
-,   m_projectionCapability{addCapability(make_unique<gloperate::PerspectiveProjectionCapability>(m_viewportCapability))}
-,   m_cameraCapability{addCapability(make_unique<gloperate::CameraCapability>())}
-,   m_multisampling{false}
-,   m_multisamplingChanged{false}
-,   m_transparency{0.5}
+,   m_targetFramebufferCapability(addCapability(new gloperate::TargetFramebufferCapability()))
+,   m_viewportCapability(addCapability(new gloperate::ViewportCapability()))
+,   m_projectionCapability(addCapability(new gloperate::PerspectiveProjectionCapability(m_viewportCapability)))
+,   m_cameraCapability(addCapability(new gloperate::CameraCapability()))
+,   m_multisampling(false)
+,   m_multisamplingChanged(false)
+,   m_transparency(0.5)
 {    
     setupPropertyGroup();
 }
@@ -229,7 +230,7 @@ void ScreenDoor::setupDrawable()
     aiReleaseImport(scene);
     
     for (const auto & geometry : geometries)
-        m_drawables.push_back(make_unique<PolygonalDrawable>(geometry));
+        m_drawables.push_back(gloperate::make_unique<PolygonalDrawable>(geometry));
 }
 
 void ScreenDoor::setupProgram()

@@ -33,10 +33,10 @@ using widgetzeug::make_unique;
 
 EmptyExample::EmptyExample(gloperate::ResourceManager & resourceManager)
 :   Painter(resourceManager)
-,   m_targetFramebufferCapability{addCapability(make_unique<gloperate::TargetFramebufferCapability>())}
-,   m_viewportCapability{addCapability(make_unique<gloperate::ViewportCapability>())}
-,   m_projectionCapability{addCapability(make_unique<gloperate::PerspectiveProjectionCapability>(m_viewportCapability))}
-,   m_cameraCapability{addCapability(make_unique<gloperate::CameraCapability>())}
+,   m_targetFramebufferCapability(addCapability(new gloperate::TargetFramebufferCapability()))
+,   m_viewportCapability(addCapability(new gloperate::ViewportCapability()))
+,   m_projectionCapability(addCapability(new gloperate::PerspectiveProjectionCapability(m_viewportCapability)))
+,   m_cameraCapability(addCapability(new gloperate::CameraCapability()))
 {
 }
 
