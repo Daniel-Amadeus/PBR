@@ -154,7 +154,7 @@ else()
 endif()
 
 # Install the project meta files
-install(FILES cgexamples-config.cmake DESTINATION ${INSTALL_ROOT})
+install(FILES glexamples-config.cmake DESTINATION ${INSTALL_ROOT})
 install(FILES AUTHORS DESTINATION               ${INSTALL_ROOT})
 install(FILES LICENSE DESTINATION               ${INSTALL_ROOT})
 
