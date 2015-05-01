@@ -1,5 +1,5 @@
 
-set(target viewer)
+set(target glexamples-viewer)
 message(STATUS "App ${target}")
 
 

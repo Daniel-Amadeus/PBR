@@ -20,6 +20,7 @@
 #include <globjects/Texture.h>
 
 #include <gloperate/base/RenderTargetType.h>
+#include <gloperate/base/make_unique.hpp>
 
 #include <gloperate/painter/TargetFramebufferCapability.h>
 #include <gloperate/painter/ViewportCapability.h>
@@ -49,11 +50,11 @@ using widgetzeug::make_unique;
 
 StochasticTransparency::StochasticTransparency(gloperate::ResourceManager & resourceManager)
 :   Painter(resourceManager)
-,   m_targetFramebufferCapability(addCapability(make_unique<gloperate::TargetFramebufferCapability>()))
-,   m_viewportCapability(addCapability(make_unique<gloperate::ViewportCapability>()))
-,   m_projectionCapability(addCapability(make_unique<gloperate::PerspectiveProjectionCapability>(m_viewportCapability)))
-,   m_cameraCapability(addCapability(make_unique<gloperate::CameraCapability>()))
-,   m_options(make_unique<StochasticTransparencyOptions>(*this))
+,   m_targetFramebufferCapability(addCapability(new gloperate::TargetFramebufferCapability()))
+,   m_viewportCapability(addCapability(new gloperate::ViewportCapability()))
+,   m_projectionCapability(addCapability(new gloperate::PerspectiveProjectionCapability(m_viewportCapability)))
+,   m_cameraCapability(addCapability(new gloperate::CameraCapability()))
+,   m_options(new StochasticTransparencyOptions(*this))
 {
 }
 
@@ -180,7 +181,7 @@ void StochasticTransparency::setupDrawable()
     aiReleaseImport(scene);
     
     for (const auto & geometry : geometries)
-        m_drawables.push_back(make_unique<PolygonalDrawable>(geometry));
+        m_drawables.push_back(gloperate::make_unique<PolygonalDrawable>(geometry));
 }
 
 void StochasticTransparency::setupPrograms()
@@ -237,7 +238,7 @@ void StochasticTransparency::updateFramebuffer()
     m_opaqueColorAttachment->image2DMultisample(numSamples, GL_RGBA8, size, GL_FALSE);
     m_transparentColorAttachment->image2DMultisample(numSamples, GL_RGBA32F, size, GL_FALSE);
     m_totalAlphaAttachment->image2DMultisample(numSamples, GL_R32F, size, GL_FALSE);
-    m_depthAttachment->image2DMultisample(numSamples, GL_DEPTH_COMPONENT16, size, GL_FALSE);
+    m_depthAttachment->image2DMultisample(numSamples, GL_DEPTH_COMPONENT, size, GL_FALSE);
 }
 
 void StochasticTransparency::updateNumSamples()
@@ -256,9 +257,9 @@ void StochasticTransparency::clearBuffers()
 {
     m_fbo->setDrawBuffers({ kOpaqueColorAttachment, kTransparentColorAttachment, kTotalAlphaAttachment });
     
-    m_fbo->clearBuffer(GL_COLOR, 0, glm::vec4{0.85f, 0.87f, 0.91f, 1.0f});
-    m_fbo->clearBuffer(GL_COLOR, 1, glm::vec4{0.0f});
-    m_fbo->clearBuffer(GL_COLOR, 2, glm::vec4{1.0f});
+    m_fbo->clearBuffer(GL_COLOR, 0, glm::vec4(0.85f, 0.87f, 0.91f, 1.0f));
+    m_fbo->clearBuffer(GL_COLOR, 1, glm::vec4(0.0f));
+    m_fbo->clearBuffer(GL_COLOR, 2, glm::vec4(1.0f));
     m_fbo->clearBufferfi(GL_DEPTH_STENCIL, 0, 1.0f, 0.0f);
 }
 
