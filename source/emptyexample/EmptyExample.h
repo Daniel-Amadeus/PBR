@@ -5,8 +5,11 @@
 #include <glbinding/gl/types.h>
 
 #include <globjects/base/ref_ptr.h>
+#include <globjects/Texture.h>
 
 #include <gloperate/painter/Painter.h>
+
+#include <glm/mat4x4.hpp>
 
 
 namespace globjects
@@ -16,7 +19,8 @@ namespace globjects
 
 namespace gloperate
 {
-    class AdaptiveGrid;
+	class AdaptiveGrid;
+	class ResourceManager;
     class Icosahedron;
     class AbstractTargetFramebufferCapability;
     class AbstractViewportCapability;
@@ -30,7 +34,16 @@ public:
     EmptyExample(gloperate::ResourceManager & resourceManager);
     virtual ~EmptyExample();
 
+	void EmptyExample::setupPropertyGroup();
+
     void setupProjection();
+
+	float eyeX() const;
+	void setEyeX(float eyeX);
+	float eyeY() const;
+	void setEyeY(float eyeY);
+	float eyeZ() const;
+	void setEyeZ(float eyeZ);
 
 protected:
     virtual void onInitialize() override;
@@ -47,5 +60,12 @@ protected:
     globjects::ref_ptr<gloperate::AdaptiveGrid> m_grid;
     globjects::ref_ptr<gloperate::Icosahedron> m_icosahedron;
     globjects::ref_ptr<globjects::Program> m_program;
-    gl::GLint m_transformLocation;
+	//glm::vec3 m_pointLamp;
+	gl::GLint m_transformLocation;
+	gl::GLint m_eyeLocation;
+
+	globjects::Texture *m_color;
+	globjects::Texture *m_normals;
+	globjects::Texture *m_envmap;
+	glm::mat4x4 m_icoTransform;
 };
